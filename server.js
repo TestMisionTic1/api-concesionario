@@ -2,11 +2,13 @@
 // const express = require("express");
 
 import Express from "express";
-import { MongoClient, ObjectId } from "mongodb";
 import Cors from "cors";
+import dotenv from "dotenv";
+import { MongoClient, ObjectId } from "mongodb";
 
-const StringConexion =
-  "mongodb+srv://dsp5502:Dp082355@proyectoconcesionario.wypvm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+dotenv.config({ path: "./.env" });
+
+const StringConexion = process.env.DATABASE_URL;
 
 const client = new MongoClient(StringConexion, {
   useNewUrlParser: true,
@@ -112,8 +114,8 @@ const main = () => {
     }
     conexion = db.db("concesionario");
     console.log("conexion exitosa");
-    return app.listen(5000, () => {
-      console.log("escuchando puerto 5000");
+    return app.listen(process.env.PORT, () => {
+      console.log(`escuchando puerto ${process.env.PORT}`);
     });
   });
 };
