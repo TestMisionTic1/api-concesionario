@@ -4,18 +4,10 @@
 import Express from "express";
 import Cors from "cors";
 import dotenv from "dotenv";
-import { MongoClient, ObjectId } from "mongodb";
+import { conectarBD, getDB } from "./db/db.js";
+import { ObjectId } from "mongodb";
 
 dotenv.config({ path: "./.env" });
-
-const StringConexion = process.env.DATABASE_URL;
-
-const client = new MongoClient(StringConexion, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-let conexion;
 
 const app = Express();
 
@@ -24,6 +16,7 @@ app.use(Cors());
 
 app.get("/vehiculos", (req, res) => {
   console.log("Alguien hizo get enla ruta /vehiculos");
+  const conexion = getDB();
   conexion
     .collection("vehiculo")
     .find({})
@@ -48,6 +41,7 @@ app.post("/vehiculos/nuevo", (req, res) => {
       Object.keys(datosVehiculo).includes("model")
     ) {
       // implementar codigo para crear vehiculo en la base de dato
+      const conexion = getDB();
       conexion
         .collection("vehiculo")
         .insertOne(datosVehiculo, (err, result) => {
@@ -75,6 +69,7 @@ app.patch("/vehiculos/editar", (req, res) => {
   const operacion = {
     $set: edicion,
   };
+  const conexion = getDB();
   conexion.collection("vehiculo").findOneAndUpdate(
     filtroVehiculo,
     operacion,
@@ -96,6 +91,7 @@ app.patch("/vehiculos/editar", (req, res) => {
 
 app.delete("/vehiculos/eliminar", (req, res) => {
   const filtroVehiculo = { _id: new ObjectId(req.body.id) };
+  const conexion = getDB();
   conexion.collection("vehiculo").deleteOne(filtroVehiculo, (err, result) => {
     if (err) {
       console.error(err);
@@ -107,17 +103,9 @@ app.delete("/vehiculos/eliminar", (req, res) => {
 });
 
 const main = () => {
-  client.connect((err, db) => {
-    if (err) {
-      console.log("Error conectando a la base de datos");
-      return "error";
-    }
-    conexion = db.db("concesionario");
-    console.log("conexion exitosa");
-    return app.listen(process.env.PORT, () => {
-      console.log(`escuchando puerto ${process.env.PORT}`);
-    });
+  return app.listen(process.env.PORT, () => {
+    console.log(`escuchando puerto ${process.env.PORT}`);
   });
 };
 
-main();
+conectarBD(main);
